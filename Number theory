@@ -117,7 +117,7 @@ int mod_divide(int a, int b) {
 
 
 const int mod = 1e9 + 7;
-const int MAXN = 1e5 + 5; // Adjust based on max value of n you'll use
+const int MAXN = 1e5 + 5; // Adjust based on max value
 
 vector<int> fact(MAXN), inv_fact(MAXN);
 
@@ -146,7 +146,7 @@ void precompute_factorials() {
     }
 }
 
-// ✅ Reusable function to compute nCr % mod
+//  Reusable function to compute nCr % mod
 int nCr(int n, int r) {
     if (r < 0 || r > n) return 0;
     return fact[n] * inv_fact[r] % mod * inv_fact[n - r] % mod;
