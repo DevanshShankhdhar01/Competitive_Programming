@@ -1,0 +1,111 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+/* -------------------- Fast IO -------------------- */
+static inline void fastio() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+}
+
+/* -------------------- Query -------------------- */
+struct Query {
+    int l, r, idx;
+};
+
+int BLOCK;
+
+/* -------------------- Globals -------------------- */
+vector<int> a;          // compressed array
+vector<int> cnt;        // cnt[x] = frequency of value x
+vector<int> freqCnt;    // freqCnt[f] = number of values with frequency f
+vector<int> ans;
+int curMax = 0;
+
+/* -------------------- Comparator (odd-even Mo) -------------------- */
+inline bool cmp(const Query &A, const Query &B) {
+    int blockA = A.l / BLOCK;
+    int blockB = B.l / BLOCK;
+    if (blockA != blockB) return blockA < blockB;
+    if (blockA & 1) return A.r > B.r;
+    return A.r < B.r;
+}
+
+/* -------------------- Add / Remove -------------------- */
+inline void add(int x) {
+    int c = cnt[x];
+    freqCnt[c]--;
+    cnt[x] = c + 1;
+    freqCnt[c + 1]++;
+    if (c + 1 > curMax) curMax = c + 1;
+}
+
+inline void remove_(int x) {
+    int c = cnt[x];
+    freqCnt[c]--;
+    cnt[x] = c - 1;
+    freqCnt[c - 1]++;
+    while (curMax > 0 && freqCnt[curMax] == 0) curMax--;
+}
+
+/* -------------------- Main -------------------- */
+int main() {
+    fastio();
+
+    int n, q;
+    cin >> n >> q;
+
+    a.resize(n);
+    for (int i = 0; i < n; i++) cin >> a[i];
+
+    /* ---- Coordinate compression ---- */
+    vector<int> vals = a;
+    sort(vals.begin(), vals.end());
+    vals.erase(unique(vals.begin(), vals.end()), vals.end());
+    for (int &x : a)
+        x = lower_bound(vals.begin(), vals.end(), x) - vals.begin();
+
+    vector<Query> queries(q);
+    vector<pair<int,int>> original(q);
+    for (int i = 0; i < q; i++) {
+        cin >> queries[i].l >> queries[i].r;
+        original[i] = {queries[i].l, queries[i].r};
+        queries[i].l--; queries[i].r--;
+        queries[i].idx = i;
+    }
+
+    /* ---- Optimal block size ---- */
+    BLOCK = max(1, (int)(n / sqrt(q)));
+
+    sort(queries.begin(), queries.end(), cmp);
+
+    cnt.assign(vals.size(), 0);
+    freqCnt.assign(n + 1, 0);
+    ans.resize(q);
+
+    int L = 0, R = -1;
+
+    for (const Query &qr : queries) {
+        while (L > qr.l) add(a[--L]);
+        while (R < qr.r) add(a[++R]);
+        while (L < qr.l) remove_(a[L++]);
+        while (R > qr.r) remove_(a[R--]);
+        ans[qr.idx] = curMax;
+    }
+
+    /* ---- Post processing (problem specific) ---- */
+    for (int i = 0; i < q; i++) {
+        int l = original[i].first;
+        int r = original[i].second;
+        int len = r - l + 1;
+        int mx = ans[i];
+
+        if (mx <= (len + 1) / 2) {
+            cout << 1 << '\n';
+        } else {
+            int extra = mx - (len + 1) / 2;
+            int steps = 2 * extra - (len % 2 == 0);
+            cout << 1 + steps << '\n';
+        }
+    }
+    return 0;
+}
