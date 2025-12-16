@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+const int MAXN = 200000+5;
+
+vector<int> adj[MAXN];
+int tin[MAXN], low[MAXN];
+bool visited[MAXN];
+int timer = 0;
+
+vector<pair<int,int>> bridges;
+
+void dfs(int v, int p = -1) {
+    visited[v] = true;
+    tin[v] = low[v] = timer++;
+
+    for (int to : adj[v]) {
+        if (to == p) continue;
+
+        if (visited[to]) {
+            // back edge
+            low[v] = min(low[v], tin[to]);
+        } else {
+            dfs(to, v);
+            low[v] = min(low[v], low[to]);
+
+            if (low[to] > tin[v]) {
+                bridges.emplace_back(v, to);
+            }
+        }
+    }
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n, m;
+    cin >> n >> m;
+
+    for (int i = 0; i < m; i++) {
+        int u, v;
+        cin >> u >> v;
+       
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+
+    for (int i = 1; i <= n; i++) {
+        if (!visited[i]) {
+            dfs(i);
+        }
+    }
+
+    // Output bridges
+    for (auto [u, v] : bridges) {
+        cout << u + 1 << " " << v + 1 << "\n";
+    }
+}
