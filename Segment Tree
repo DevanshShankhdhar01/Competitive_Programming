@@ -8,21 +8,20 @@ public:
         seg.assign(4*n, 0);
     }
 
+    // ===== CORE OPERATION =====
     long long merge(long long a, long long b) {
         return a + b;   // change for max/min/gcd
     }
 
+   
     void build(int node, int low, int high, vector<long long>& arr) {
         if (low == high) {
             seg[node] = arr[low];
             return;
         }
-
-        int mid = (low + high)/2;
-
+        int mid = (low + high) / 2;
         build(2*node+1, low, mid, arr);
         build(2*node+2, mid+1, high, arr);
-
         seg[node] = merge(seg[2*node+1], seg[2*node+2]);
     }
 
@@ -30,12 +29,11 @@ public:
         if (r < low || high < l) return 0;
         if (l <= low && high <= r) return seg[node];
 
-        int mid = (low + high)/2;
-
-        long long left  = query(2*node+1, low, mid, l, r);
-        long long right = query(2*node+2, mid+1, high, l, r);
-
-        return merge(left, right);
+        int mid = (low + high) / 2;
+        return merge(
+            query(2*node+1, low, mid, l, r),
+            query(2*node+2, mid+1, high, l, r)
+        );
     }
 
     void update(int node, int low, int high, int idx, long long val) {
@@ -43,12 +41,25 @@ public:
             seg[node] = val;
             return;
         }
-
-        int mid = (low + high)/2;
-
-        if (idx <= mid) update(2*node+1, low, mid, idx, val);
-        else update(2*node+2, mid+1, high, idx, val);
-
+        int mid = (low + high) / 2;
+        if (idx <= mid)
+            update(2*node+1, low, mid, idx, val);
+        else
+            update(2*node+2, mid+1, high, idx, val);
         seg[node] = merge(seg[2*node+1], seg[2*node+2]);
+    }
+
+    
+
+    void build(vector<long long>& arr) {
+        build(0, 0, n-1, arr);
+    }
+
+    long long range_query(int l, int r) {
+        return query(0, 0, n-1, l, r);
+    }
+
+    void point_update(int idx, long long val) {
+        update(0, 0, n-1, idx, val);
     }
 };
