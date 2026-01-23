@@ -2,7 +2,7 @@
 using namespace std;
 
 const int MAXN = 200000;      // change according to constraints
-const int LOG   = 20;         // since 2^20 > 1e6
+const int LOG   = 25;         // since 2^20 > 1e6
 
 vector<int> adj[MAXN+1];
 int up[MAXN+1][LOG];          // up[v][j] = 2^j-th ancestor of v
